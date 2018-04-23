@@ -20,7 +20,7 @@ public class Application {
 
         liveConnection = mySQLDB.doConnectToDB();
 
-        UserHelper.userMenu();
+        UserHelper.userMenu(liveConnection);
 
         mySQLDB.doDisconnectFromDB(liveConnection);
 
