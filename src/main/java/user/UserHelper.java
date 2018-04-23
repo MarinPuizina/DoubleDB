@@ -1,15 +1,13 @@
 package user;
 
+import db.mysql.MySqlHelper;
+
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class UserHelper {
 
-
-    public static final String DB_TABLE = "doubledb.userdata";
+    private static Scanner keyboardIn = new Scanner(System.in);
 
 
     public static void userMenu(Connection liveConnection) {
@@ -28,118 +26,69 @@ public class UserHelper {
         System.out.println("***********************");
         System.out.println();
 
-        // TODO - logic for checking for user option
+        System.out.print("-->");
+        String menuOption = keyboardIn.nextLine();
 
-        userRegistration(liveConnection);
+        if ("1".equals(menuOption)) {
+            userLogin(liveConnection);
+        } else if ("2".equals(menuOption)) {
+            userRegistration(liveConnection);
+        } else if ("3".equals(menuOption)) {
+            return;
+        } else {
+            System.out.println("Please choose valid option from the menu.");
+            userMenu(liveConnection);
+        }
 
     }
 
     public static void userRegistration(Connection liveConnection) {
 
 
-        Scanner keyboardIn = new Scanner(System.in);
-
         System.out.println("--> Registration <--");
         System.out.println("");
 
         System.out.println("Please enter User Name: ");
+        System.out.print("-->");
         String userName = keyboardIn.nextLine();
 
-        if (findUserByName(liveConnection, userName)) {
-            registationOptions(liveConnection, keyboardIn, true);
-        }
+        if (MySqlHelper.findUserByName(liveConnection, userName)) {
+            registationOptions(liveConnection, true);
+        } else {
 
-//        System.out.println("Please enter Password:");
-//        String userPassword = keyboardIn.nextLine();
+            System.out.println("Please enter User Password: ");
+            System.out.print("-->");
+            String userPassword = keyboardIn.nextLine();
+
+            MySqlHelper.insertUserData(liveConnection, userName, userPassword);
+
+        }
 
     }
 
-    private static void registationOptions(Connection liveConnection, Scanner keyboardIn, boolean optionText) {
+    private static void registationOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
-            System.out.println("Registration failed, that User Name is take.");
+            System.out.println("Registration failed, that User Name is taken.");
         }
 
         System.out.println("Press 1 to enter new name or 2 to return to menu.");
 
 
-        int regOption = keyboardIn.nextInt();
+        String regOption = keyboardIn.nextLine();
 
-        if (regOption == 1) {
+        if ("1".equals(regOption)) {
             userRegistration(liveConnection);
-        } else if (regOption == 2) {
+        } else if ("2".equals(regOption)) {
             userMenu(liveConnection);
         } else {
             System.out.println("Please choose valid option.");
-            registationOptions(liveConnection, keyboardIn, false);
+            registationOptions(liveConnection, false);
         }
 
     }
 
-    private static boolean findUserByName(Connection liveConnection, String userName) {
-
-        PreparedStatement findUserName = null;
-        ResultSet resultSet;
-        boolean check = false;
-
-        String findUserNameQuery = "SELECT * FROM " + DB_TABLE + " WHERE userName = ? COLLATE UTF8_GENERAL_CI";
-
-        try {
-
-            liveConnection.setAutoCommit(false);
-
-            findUserName = liveConnection.prepareStatement(findUserNameQuery);
-            findUserName.setString(1, userName);
-
-            System.out.println(findUserName);
-            resultSet = findUserName.executeQuery();
-
-            if (resultSet != null) {
-                check = true;
-            }
-
-            liveConnection.commit();
-
-        } catch (SQLException e) {
-            System.out.println("Prepare statement execution failed!");
-            e.printStackTrace();
-
-            if (liveConnection != null) {
-
-                System.out.println("Connection is still alive, trying to rolled back transaction.");
-
-                try {
-                    liveConnection.rollback();
-                } catch (SQLException e1) {
-                    System.out.println("Transaction roll back failed!");
-                    e1.printStackTrace();
-                }
-
-            }
-
-        } finally {
-
-//            No need to close db connection here,
-//            we are doing it later with disconnect method
-
-            try {
-
-                if (findUserName != null) {
-                    findUserName.close();
-                }
-
-            } catch (SQLException e) {
-                System.out.println("Failed to close prepare statement and/or connection!");
-                e.printStackTrace();
-            }
-
-        }
-
-        return check;
-
-    }
-
-    public void userLogin(String userName, String userPassword) {
+    public static void userLogin(Connection liveConnection) {
 
     }
 
