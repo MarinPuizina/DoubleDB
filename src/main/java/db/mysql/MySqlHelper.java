@@ -9,6 +9,7 @@ public class MySqlHelper {
 
     private static final String DB_TABLE = "doubledb.userdata";
     private static final String QUERY_FIND_USER_NAME = "SELECT * FROM " + DB_TABLE + " WHERE userName = ? COLLATE UTF8_GENERAL_CI";
+    private static final String QUERY_LOGIN_USER = "SELECT * FROM " + DB_TABLE + " WHERE userName = ? AND userPassword = ?";
     private static final String QUERY_INSERT_USER_DATA = "INSERT INTO " + DB_TABLE + " (userName, userPassword) VALUES (?,?)";
 
 
@@ -72,6 +73,7 @@ public class MySqlHelper {
 
     }
 
+
     public static void insertUserData(Connection liveConnection, String userName, String userPassword) {
 
         PreparedStatement insertUserData = null;
@@ -123,7 +125,67 @@ public class MySqlHelper {
 
         }
 
+    }
 
+
+    public static boolean loginUser(Connection liveConnection, String userName, String userPassword) {
+
+        PreparedStatement findLoginUser = null;
+        ResultSet resultSet;
+        boolean check = false;
+
+        try {
+
+            liveConnection.setAutoCommit(false);
+
+            findLoginUser = liveConnection.prepareStatement(QUERY_LOGIN_USER);
+            findLoginUser.setString(1, userName);
+            findLoginUser.setString(2, userPassword);
+
+            resultSet = findLoginUser.executeQuery();
+
+            if (resultSet.next()) {
+                check = true;
+            }
+
+            liveConnection.commit();
+
+        } catch (SQLException e) {
+            System.out.println("Prepare statement execution failed!");
+            e.printStackTrace();
+
+            if (liveConnection != null) {
+
+                System.out.println("Connection is still alive, trying to rolled back transaction.");
+
+                try {
+                    liveConnection.rollback();
+                } catch (SQLException e1) {
+                    System.out.println("Transaction roll back failed!");
+                    e1.printStackTrace();
+                }
+
+            }
+
+        } finally {
+
+            // No need to close db connection here,
+            // we are doing it later with disconnect method
+
+            try {
+
+                if (findLoginUser != null) {
+                    findLoginUser.close();
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Failed to close prepare statement and/or connection!");
+                e.printStackTrace();
+            }
+
+        }
+
+        return check;
 
     }
 

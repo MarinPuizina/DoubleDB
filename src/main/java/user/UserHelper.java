@@ -42,6 +42,49 @@ public class UserHelper {
 
     }
 
+
+    public static void userLogin(Connection liveConnection) {
+
+        System.out.println("--> Login <--");
+        System.out.println("");
+
+        System.out.println("Please enter User Name: ");
+        System.out.print("-->");
+        String userName = keyboardIn.nextLine();
+
+        System.out.println("Please enter User Password: ");
+        System.out.print("-->");
+        String userPassword = keyboardIn.nextLine();
+
+        if(MySqlHelper.loginUser(liveConnection, userName, userPassword)) {
+            System.out.println(userName + ", you have successfully logged in.");
+        } else {
+            loginOptions(liveConnection, true);
+        }
+
+    }
+
+    private static void loginOptions(Connection liveConnection, boolean optionText) {
+
+        if (optionText) {
+            System.out.println("You have entered wrong credentials.");
+        }
+        System.out.println("Press 1 to try again or 2 to return to menu.");
+
+        String loginOption = keyboardIn.nextLine();
+
+        if ("1".equals(loginOption)) {
+            userLogin(liveConnection);
+        } else if ("2".equals(loginOption)) {
+            userMenu(liveConnection);
+        } else {
+            System.out.println("Please choose valid option.");
+            loginOptions(liveConnection, false);
+        }
+
+    }
+
+
     public static void userRegistration(Connection liveConnection) {
 
 
@@ -66,6 +109,7 @@ public class UserHelper {
 
     }
 
+
     private static void registationOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
@@ -73,7 +117,6 @@ public class UserHelper {
         }
 
         System.out.println("Press 1 to enter new name or 2 to return to menu.");
-
 
         String regOption = keyboardIn.nextLine();
 
@@ -85,10 +128,6 @@ public class UserHelper {
             System.out.println("Please choose valid option.");
             registationOptions(liveConnection, false);
         }
-
-    }
-
-    public static void userLogin(Connection liveConnection) {
 
     }
 
