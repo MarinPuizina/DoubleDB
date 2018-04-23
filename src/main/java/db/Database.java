@@ -1,7 +1,7 @@
-package DB;
+package db;
 
-import DB.MySQL.ConnectToDBBehavior;
-import DB.MySQL.DisconnectFromDBBehavior;
+import db.mysql.ConnectToDBBehavior;
+import db.mysql.DisconnectFromDBBehavior;
 
 import java.sql.Connection;
 

@@ -1,4 +1,4 @@
-package DB.MySQL;
+package db.mysql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,7 +6,7 @@ import java.sql.SQLException;
 public class DisconnectFromMySQL implements DisconnectFromDBBehavior {
 
     /**
-     * Method used for closing connection from MySQL DB
+     * Method used for closing connection from mysql db
      *
      * @param liveConnection
      */
@@ -15,10 +15,10 @@ public class DisconnectFromMySQL implements DisconnectFromDBBehavior {
         try {
 
             liveConnection.close();
-            System.out.println("You have disconnected from MySQL DB.");
+            System.out.println("You have disconnected from mysql db.");
 
         } catch (SQLException e) {
-            System.out.println("Issue with disconnecting from MySQL DB.");
+            System.out.println("Issue with disconnecting from mysql db.");
             e.printStackTrace();
         }
 

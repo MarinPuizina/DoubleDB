@@ -1,4 +1,4 @@
-package DB.MySQL;
+package db.mysql;
 
 import java.sql.Connection;
 

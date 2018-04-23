@@ -1,6 +1,6 @@
-package DB.MySQL;
+package db.mysql;
 
-import DB.Database;
+import db.Database;
 
 public class MySQL extends Database {
 
