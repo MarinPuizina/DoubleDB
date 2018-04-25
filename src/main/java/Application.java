@@ -12,7 +12,9 @@ public class Application {
 
     public static void main(String[] args){
 
+        UserHelper userHelper = new UserHelper();
         Database mySQLDB = new MySQL();
+
         Connection liveConnection;
 
         mySQLDB.setDbUserName(DB_NAME);
@@ -20,7 +22,7 @@ public class Application {
 
         liveConnection = mySQLDB.doConnectToDB();
 
-        UserHelper.userMenu(liveConnection);
+        userHelper.userMenu(liveConnection);
 
         mySQLDB.doDisconnectFromDB(liveConnection);
 

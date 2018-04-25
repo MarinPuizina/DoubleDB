@@ -2,15 +2,19 @@ package user;
 
 import db.mysql.MySqlHelper;
 
+import javax.crypto.SecretKey;
 import java.sql.Connection;
+import java.util.Base64;
 import java.util.Scanner;
 
 public class UserHelper {
 
     private static Scanner keyboardIn = new Scanner(System.in);
 
+    private MySqlHelper mySqlHelper = new MySqlHelper();
 
-    public static void userMenu(Connection liveConnection) {
+
+    public void userMenu(Connection liveConnection) {
 
         System.out.println();
         System.out.println("***********************");
@@ -43,7 +47,7 @@ public class UserHelper {
     }
 
 
-    public static void userLogin(Connection liveConnection) {
+    private void userLogin(Connection liveConnection) {
 
         System.out.println("--> Login <--");
         System.out.println("");
@@ -56,7 +60,7 @@ public class UserHelper {
         System.out.print("-->");
         String userPassword = keyboardIn.nextLine();
 
-        if(MySqlHelper.loginUser(liveConnection, userName, userPassword)) {
+        if(mySqlHelper.loginUser(liveConnection, userName, userPassword)) {
             System.out.println(userName + ", you have successfully logged in.");
         } else {
             loginOptions(liveConnection, true);
@@ -64,7 +68,7 @@ public class UserHelper {
 
     }
 
-    private static void loginOptions(Connection liveConnection, boolean optionText) {
+    private void loginOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
             System.out.println("You have entered wrong credentials.");
@@ -85,7 +89,7 @@ public class UserHelper {
     }
 
 
-    public static void userRegistration(Connection liveConnection) {
+    private void userRegistration(Connection liveConnection) {
 
 
         System.out.println("--> Registration <--");
@@ -95,7 +99,7 @@ public class UserHelper {
         System.out.print("-->");
         String userName = keyboardIn.nextLine();
 
-        if (MySqlHelper.findUserByName(liveConnection, userName)) {
+        if (mySqlHelper.findUserByName(liveConnection, userName)) {
             registationOptions(liveConnection, true);
         } else {
 
@@ -103,14 +107,20 @@ public class UserHelper {
             System.out.print("-->");
             String userPassword = keyboardIn.nextLine();
 
-            MySqlHelper.insertUserData(liveConnection, userName, userPassword);
+            SecretKey userSecretKey = null;
+            String encryptedPassword = Base64.getEncoder().encodeToString(mySqlHelper.encryptPassword(userPassword, userSecretKey));
+            String encryptedSecretKey = mySqlHelper.convertSecretKeyToString(userSecretKey);
+
+
+            // TODO - edit query so it stores encrypted password and secret key in two tables
+            mySqlHelper.insertUserData(liveConnection, userName, encryptedPassword, encryptedSecretKey);
 
         }
 
     }
 
 
-    private static void registationOptions(Connection liveConnection, boolean optionText) {
+    private void registationOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
             System.out.println("Registration failed, that User Name is taken.");
