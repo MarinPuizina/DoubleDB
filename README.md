@@ -10,7 +10,7 @@ from which db I want to pull data.
 
 So far this is my idea for this project which I'm sure will change in future.
 
-25/04/2018
+25/04/2018  
 So far I did user login and registration, I've added encryption using AES algorithm. At first I was considering 
 using Twofish but after some research I've decided to go with AES. 
 I've aranged my db for user data to have two tables. In first I store userName and encrypted userPassword
