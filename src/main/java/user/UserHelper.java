@@ -60,8 +60,24 @@ public class UserHelper {
         System.out.print("-->");
         String userPassword = keyboardIn.nextLine();
 
-        if(mySqlHelper.loginUser(liveConnection, userName, userPassword)) {
-            System.out.println(userName + ", you have successfully logged in.");
+        if (mySqlHelper.findUserByName(liveConnection, userName)) {
+
+            int userID = mySqlHelper.getUserID(liveConnection, userName);
+
+            String userSecretKey = mySqlHelper.getUserSecretKey(liveConnection, userID);
+            SecretKey secretKey = mySqlHelper.convertStringToSecretKey(userSecretKey);
+            mySqlHelper.setSecretEncryptKey(secretKey);
+
+            byte[] encryptedPassword = mySqlHelper.encryptPasswordUsingSavedSecretKey(userPassword);
+
+            userPassword = Base64.getEncoder().encodeToString(encryptedPassword);
+
+            if(mySqlHelper.loginUser(liveConnection, userName, userPassword)) {
+                System.out.println(userName + ", you have successfully logged in.");
+            } else {
+                loginOptions(liveConnection, true);
+            }
+
         } else {
             loginOptions(liveConnection, true);
         }
@@ -107,12 +123,9 @@ public class UserHelper {
             System.out.print("-->");
             String userPassword = keyboardIn.nextLine();
 
-            SecretKey userSecretKey = null;
-            String encryptedPassword = Base64.getEncoder().encodeToString(mySqlHelper.encryptPassword(userPassword, userSecretKey));
-            String encryptedSecretKey = mySqlHelper.convertSecretKeyToString(userSecretKey);
+            String encryptedPassword = Base64.getEncoder().encodeToString(mySqlHelper.encryptPassword(userPassword));
+            String encryptedSecretKey = mySqlHelper.convertSecretKeyToString(mySqlHelper.getSecretEncryptKey());
 
-
-            // TODO - edit query so it stores encrypted password and secret key in two tables
             mySqlHelper.insertUserData(liveConnection, userName, encryptedPassword, encryptedSecretKey);
 
         }

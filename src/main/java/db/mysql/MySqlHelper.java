@@ -13,6 +13,8 @@ import java.util.Base64;
 
 public class MySqlHelper {
 
+    private SecretKey secretEncryptKey;
+
     private static final String AES = "AES";
     private static final String DB_USERDATA_TABLE = "doubledb.userdata";
     private static final String DB_KEYS_TABLE = "doubledb.keys";
@@ -21,6 +23,8 @@ public class MySqlHelper {
     private static final String QUERY_GET_USERID = "SELECT userID FROM " + DB_USERDATA_TABLE + " WHERE userName = ? AND userPassword = ?";
     private static final String QUERY_INSERT_USER_DATA = "INSERT INTO " + DB_USERDATA_TABLE + " (userName, userPassword) VALUES (?,?)";
     private static final String QUERY_INSERT_SECRET_KEY = "INSERT INTO " + DB_KEYS_TABLE + " (userID, secretKey) VALUES (?,?)";
+    private static final String QUERY_GET_USERID_BY_NAME = "SELECT userID FROM " + DB_USERDATA_TABLE + " WHERE userName = ?";
+    private static final String QUERY_GET_USER_SECRETKEY = "SELECT secretKey FROM " + DB_KEYS_TABLE + " WHERE userID = ?";
 
 
     public boolean findUserByName(Connection liveConnection, String userName) {
@@ -229,17 +233,17 @@ public class MySqlHelper {
     }
 
 
-    public byte[] encryptPassword(String userPassword, SecretKey secretEncryptKey) {
+    public byte[] encryptPassword(String userPassword) {
 
         byte[] encryptedPassword = null;
 
         try {
 
             KeyGenerator keyGen = KeyGenerator.getInstance(AES);
-            secretEncryptKey = keyGen.generateKey();
+            this.secretEncryptKey = keyGen.generateKey();
 
             Cipher cipher = Cipher.getInstance(AES);
-            cipher.init(Cipher.ENCRYPT_MODE, secretEncryptKey);
+            cipher.init(Cipher.ENCRYPT_MODE, this.secretEncryptKey);
 
             encryptedPassword = cipher.doFinal(userPassword.getBytes());
 
@@ -260,7 +264,35 @@ public class MySqlHelper {
     }
 
 
-    public void decryptPassword(byte[] encryptedPassword, SecretKey key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public byte[] encryptPasswordUsingSavedSecretKey(String userPassword) {
+
+        byte[] encryptedPassword = null;
+
+        try {
+
+            Cipher cipher = Cipher.getInstance(AES);
+            cipher.init(Cipher.ENCRYPT_MODE, this.secretEncryptKey);
+
+            encryptedPassword = cipher.doFinal(userPassword.getBytes());
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        }
+
+        return encryptedPassword;
+
+    }
+
+
+    public String decryptPassword(byte[] encryptedPassword, SecretKey key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(AES);
 
@@ -269,8 +301,10 @@ public class MySqlHelper {
 
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         byte[] plainPassword = cipher.doFinal(encryptedPassword);
-        String de = new String(plainPassword);
-        System.out.println(de);
+        String decryptedPassword = new String(plainPassword);
+        System.out.println(decryptedPassword);
+
+        return decryptedPassword;
 
     }
 
@@ -285,6 +319,7 @@ public class MySqlHelper {
 
     }
 
+
     public String convertSecretKeyToString(SecretKey secretKeyToConvert) {
 
         byte[] encodedSecretKey = secretKeyToConvert.getEncoded();
@@ -295,12 +330,99 @@ public class MySqlHelper {
 
     }
 
+
+    public int getUserID(Connection liveConnection, String userName) {
+
+        int userID = 0;
+
+        PreparedStatement findUserID = null;
+        ResultSet resultSet;
+
+        try {
+
+            liveConnection.setAutoCommit(false);
+
+            findUserID = liveConnection.prepareStatement(QUERY_GET_USERID_BY_NAME);
+            findUserID.setString(1, userName);
+
+            resultSet = findUserID.executeQuery();
+
+            while(resultSet.next()) {
+                userID = resultSet.getInt("userID");
+            }
+            if (userID == 0){
+                throw new UserIdIsZeroExeption("UserID is zero.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (UserIdIsZeroExeption userIdIsZeroExeption) {
+            userIdIsZeroExeption.printStackTrace();
+        }
+
+        return userID;
+
+    }
+
+    public String getUserSecretKey(Connection liveConnection, int userID) {
+
+        String userSecretKey = null;
+
+        PreparedStatement findUserID;
+        ResultSet resultSet;
+
+        try {
+
+            liveConnection.setAutoCommit(false);
+
+            findUserID = liveConnection.prepareStatement(QUERY_GET_USER_SECRETKEY);
+            findUserID.setInt(1, userID);
+
+            resultSet = findUserID.executeQuery();
+
+            while(resultSet.next()) {
+                userSecretKey = resultSet.getString("secretKey");
+            }
+            if ("".equals(userSecretKey)){
+                throw new SecretKeyIsExeption("secretKey is empty or null");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (SecretKeyIsExeption secretKeyIsExeption) {
+            secretKeyIsExeption.printStackTrace();
+        }
+
+        return userSecretKey;
+
+    }
+
+
+    // CUSTOM EXEPCTION
     private static class UserIdIsZeroExeption extends Exception {
 
         public UserIdIsZeroExeption(String message) {
             super(message);
         }
 
+    }
+
+    private static class SecretKeyIsExeption extends Exception {
+
+        public SecretKeyIsExeption(String message) {
+            super(message);
+        }
+
+    }
+
+
+    // GETTERS AND SETTERS
+    public SecretKey getSecretEncryptKey() {
+        return secretEncryptKey;
+    }
+
+    public void setSecretEncryptKey(SecretKey secretEncryptKey) {
+        this.secretEncryptKey = secretEncryptKey;
     }
 
 }
