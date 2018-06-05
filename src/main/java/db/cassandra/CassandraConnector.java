@@ -35,13 +35,16 @@ public class CassandraConnector {
 
     }
 
+
     public Session getSession() {
         return session;
     }
+
 
     public void close() {
         session.close();
         cluster.close();
     }
+
 
 }

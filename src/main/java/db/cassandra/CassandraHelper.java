@@ -6,15 +6,25 @@ import com.datastax.driver.core.Session;
 
 public class CassandraHelper {
 
-    public static void createKeySpace(Session session) {
+    /**
+     * If you are coming from a relational database, then the schema is the respective keyspace in Cassandra.
+     * The keyspace is the outermost container for data in Cassandra.
+     * The main attributes to set per keyspace are the Replication Factor,
+     * the Replica Placement Strategy and the Column Families
+     */
+    public static void createKeySpace(Session session, String keySpaceName) {
 
-        StringBuilder createKeySpace = new StringBuilder("CREATE KEYSPACE IF NOT EXISTS ")
-                .append("new_keyspace ")
-                .append("WITH REPLICATION = ")
-                .append("{ 'class' : 'SimpleStrategy',")
-                .append("'replication_factor' : 3};");
+        String query = "CREATE KEYSPACE IF NOT EXISTS " + keySpaceName +
+                " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3};";
 
-        String query = createKeySpace.toString();
+        session.execute(query);
+
+    }
+
+
+    public static void deleteKeySpace(Session session, String keySpaceName) {
+
+        String query = "DROP KEYSPACE " + keySpaceName;
 
         session.execute(query);
 

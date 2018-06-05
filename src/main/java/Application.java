@@ -37,7 +37,7 @@ public class Application {
         client.connect(CASS_IP_ADDRESS, CASS_PORT);
         Session session = client.getSession();
 
-        CassandraHelper.createKeySpace(session);
+        CassandraHelper.createKeySpace(session, "new_keyspace");
         CassandraHelper.createTestTable(session);
         CassandraHelper.insertDataIntoTable(session);
         CassandraHelper.queryTableByName(session, "SlaveZero");
