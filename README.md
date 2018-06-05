@@ -24,3 +24,6 @@ and fix some bugs but I'm glad that I'm almost finished with user login and regi
 Next thing to focus on will be adding additional database. Which will be NoSQL one as written in prior text.
 I think I'll go with Cassandra but after some digging I'll be sure to know what are my next steps to take, and 
 where do I want to go with this practice project.
+
+20/05/2018  
+I've implemented Cassandra as second database. I've used DataStax Java Driver for Cassandra, so at this point I did simple implementation to learn how things work. I've set up Cassandra, created keyspace, added "table", inserted data into database and selected wanted data. My plan is to learn more about Cassandra, to expand the code surrounding it. Later I'll see how the data is fed to it, maybe I'll do some IoT part of the program.
