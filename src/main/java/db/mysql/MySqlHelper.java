@@ -26,7 +26,12 @@ public class MySqlHelper {
     private static final String QUERY_GET_USERID_BY_NAME = "SELECT userID FROM " + DB_USERDATA_TABLE + " WHERE userName = ?";
     private static final String QUERY_GET_USER_SECRETKEY = "SELECT secretKey FROM " + DB_KEYS_TABLE + " WHERE userID = ?";
 
-
+    /**
+     * Prepared statement for finding if user exists in database.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param userName       name of the user that we want to find.
+     */
     public boolean findUserByName(Connection liveConnection, String userName) {
 
         PreparedStatement findUserName = null;
@@ -88,6 +93,14 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Prepared statement for inserting User Name and Password.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param userName       name of the user that we are storing in DB.
+     * @param userPassword   user's password that we are storing in DB, make sure this is encrypted.
+     * @param secretKey      the key used for decrypting the password.
+     */
     public static void insertUserData(Connection liveConnection, String userName, String userPassword, String secretKey) {
 
         PreparedStatement insertUserData = null;
@@ -114,7 +127,7 @@ public class MySqlHelper {
             while (resultSet.next()) {
                 userID = resultSet.getInt("userID");
             }
-            if (userID == 0){
+            if (userID == 0) {
                 throw new UserIdIsZeroExeption("UserID is zero.");
             }
 
@@ -171,6 +184,13 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Prepared statement for finding if user exists in database.
+     *
+     * @param liveConnection connection to MySQL DB
+     * @param userName       name of the user that we want to find
+     * @return Boolean - validating if you managed to find the user.
+     */
     public boolean loginUser(Connection liveConnection, String userName, String userPassword) {
 
         PreparedStatement findLoginUser = null;
@@ -233,6 +253,13 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Generating secretKey for password encryption then encrypting the password.
+     * Use this method when you want to store a password in DB for first time.
+     *
+     * @param userPassword User's password.
+     * @return Encrypted password.
+     */
     public byte[] encryptPassword(String userPassword) {
 
         byte[] encryptedPassword = null;
@@ -264,6 +291,12 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Method for encrypting user's password using AES encryption.
+     *
+     * @param userPassword User's password for encryption.
+     * @return Encrypted password using AES encryption.
+     */
     public byte[] encryptPasswordUsingSavedSecretKey(String userPassword) {
 
         byte[] encryptedPassword = null;
@@ -292,6 +325,13 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Method for decrypting user's password using AES encryption.
+     *
+     * @param encryptedPassword encrypted user's password.
+     * @param key               secret key used in decryption.
+     * @return Decrypted password.
+     */
     public String decryptPassword(byte[] encryptedPassword, SecretKey key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(AES);
@@ -309,6 +349,12 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Method for converting String to SecretKey.
+     *
+     * @param stringToConvert String used for converting to SecretKey.
+     * @return String converted to SecretKey.
+     */
     public SecretKey convertStringToSecretKey(String stringToConvert) {
 
         byte[] decodedKey = Base64.getDecoder().decode(stringToConvert);
@@ -320,6 +366,12 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Method for converting SecretKey to String.
+     *
+     * @param secretKeyToConvert SecretKey used for converting to String.
+     * @return SecretKey converted to String.
+     */
     public String convertSecretKeyToString(SecretKey secretKeyToConvert) {
 
         byte[] encodedSecretKey = secretKeyToConvert.getEncoded();
@@ -331,6 +383,13 @@ public class MySqlHelper {
     }
 
 
+    /**
+     * Method for finding user's ID.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param userName       for finding the user's ID.
+     * @return user's ID.
+     */
     public int getUserID(Connection liveConnection, String userName) {
 
         int userID = 0;
@@ -347,10 +406,10 @@ public class MySqlHelper {
 
             resultSet = findUserID.executeQuery();
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 userID = resultSet.getInt("userID");
             }
-            if (userID == 0){
+            if (userID == 0) {
                 throw new UserIdIsZeroExeption("UserID is zero.");
             }
 
@@ -364,6 +423,14 @@ public class MySqlHelper {
 
     }
 
+
+    /**
+     * Method for finding user's SecretKey.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param userID         user's ID.
+     * @return User's SecretKey used for password decryption.
+     */
     public String getUserSecretKey(Connection liveConnection, int userID) {
 
         String userSecretKey = null;
@@ -380,10 +447,10 @@ public class MySqlHelper {
 
             resultSet = findUserID.executeQuery();
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 userSecretKey = resultSet.getString("secretKey");
             }
-            if ("".equals(userSecretKey)){
+            if ("".equals(userSecretKey)) {
                 throw new SecretKeyIsExeption("secretKey is empty or null");
             }
 
@@ -407,6 +474,7 @@ public class MySqlHelper {
 
     }
 
+
     private static class SecretKeyIsExeption extends Exception {
 
         public SecretKeyIsExeption(String message) {
@@ -424,5 +492,6 @@ public class MySqlHelper {
     public void setSecretEncryptKey(SecretKey secretEncryptKey) {
         this.secretEncryptKey = secretEncryptKey;
     }
+
 
 }

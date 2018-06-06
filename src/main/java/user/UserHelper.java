@@ -13,7 +13,9 @@ public class UserHelper {
 
     private MySqlHelper mySqlHelper = new MySqlHelper();
 
-
+    /**
+     * Console user menu.
+     */
     public void userMenu(Connection liveConnection) {
 
         System.out.println();
@@ -47,6 +49,11 @@ public class UserHelper {
     }
 
 
+    /**
+     * User login logic.
+     *
+     * @param liveConnection connection to MySQL DB.
+     */
     private void userLogin(Connection liveConnection) {
 
         System.out.println("--> Login <--");
@@ -72,7 +79,7 @@ public class UserHelper {
 
             userPassword = Base64.getEncoder().encodeToString(encryptedPassword);
 
-            if(mySqlHelper.loginUser(liveConnection, userName, userPassword)) {
+            if (mySqlHelper.loginUser(liveConnection, userName, userPassword)) {
                 System.out.println(userName + ", you have successfully logged in.");
             } else {
                 loginOptions(liveConnection, true);
@@ -84,6 +91,12 @@ public class UserHelper {
 
     }
 
+    /**
+     * User login options.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param optionText     additional option for user.
+     */
     private void loginOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
@@ -105,6 +118,11 @@ public class UserHelper {
     }
 
 
+    /**
+     * User registration logic.
+     *
+     * @param liveConnection connection to MySQL DB.
+     */
     private void userRegistration(Connection liveConnection) {
 
 
@@ -133,6 +151,12 @@ public class UserHelper {
     }
 
 
+    /**
+     * User registration options.
+     *
+     * @param liveConnection connection to MySQL DB.
+     * @param optionText     additional option for user.
+     */
     private void registationOptions(Connection liveConnection, boolean optionText) {
 
         if (optionText) {
@@ -153,5 +177,6 @@ public class UserHelper {
         }
 
     }
+
 
 }
